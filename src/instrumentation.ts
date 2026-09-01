@@ -31,22 +31,23 @@ const sdk = new NodeSDK({
     [ATTR_SERVICE_VERSION]: '1.0.0'
   }),
   logRecordProcessors: [
-    new SimpleLogRecordProcessor(
-      new OTLPLogExporter({
+    new SimpleLogRecordProcessor({
+      exporter: new OTLPLogExporter({
         url: otelExporterOTLPEndpoint + '/v1/logs',
         headers: {otelExporterOTLPHeaders}
       })
-    ),
-    new SimpleLogRecordProcessor(new ConsoleLogRecordExporter())
+    }),
+    new SimpleLogRecordProcessor({exporter: new ConsoleLogRecordExporter()})
   ],
   instrumentations: [new BunyanInstrumentation()]
 })
 
 try {
   sdk.start()
-  console.log('OpenTelemetry SDK started')
-  console.log('Sending logs to:', otelExporterOTLPEndpoint)
-  console.log('Using headers:', otelExporterOTLPHeaders)
+  core.info('OpenTelemetry SDK started')
+  core.info(`Sending logs to: ${otelExporterOTLPEndpoint}`)
 } catch (error) {
-  console.error('Error starting OpenTelemetry SDK:', error)
+  core.error(
+    `Error starting OpenTelemetry SDK: ${error instanceof Error ? error.message : String(error)}`
+  )
 }
